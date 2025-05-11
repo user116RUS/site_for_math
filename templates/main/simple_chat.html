@@ -1,0 +1,50 @@
+{% extends "wrapper.html" %}
+{% load static %}
+
+{% block title %}Простой чат{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Чат с ИИ</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chat-messages" style="height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #ddd; padding: 10px;">
+                        <div class="message ai-message">Здравствуйте! Я ваш ассистент. Чем могу помочь?</div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Введите ваше сообщение...">
+                        <button class="btn btn-primary" id="send-button" type="button">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+    }
+    
+    .user-message {
+        background-color: #007bff;
+        color: white;
+        margin-left: auto;
+    }
+    
+    .ai-message {
+        background-color: #f0f0f0;
+        margin-right: auto;
+    }
+</style>
+
+<!-- Подключаем внешний скрипт -->
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %} 

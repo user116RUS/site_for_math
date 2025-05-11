@@ -1,0 +1,268 @@
+{% extends '../wrapper.html' %}
+
+{% block title %}Главная - AI Репетитор по математике{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="mb-4">Добро пожаловать в AI Репетитор по Математике!</h1>
+            <p class="lead mb-4">
+                Наш сервис создан, чтобы помочь вам освоить математику в интерактивном режиме.
+                Искусственный интеллект будет вашим персональным наставником, адаптируясь к вашему уровню знаний и помогая решать задачи шаг за шагом.
+            </p>
+            <p class="mb-4">
+                Забудьте о скучных учебниках! У нас вы будете учиться, решая интересные задачи и получая мгновенную обратную связь.
+                Начните свой путь к пониманию математики уже сегодня.
+            </p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'user:sign_up' %}" class="btn btn-primary btn-lg me-2">Начать обучение</a>
+                <a href="#features" class="btn btn-secondary btn-lg">Узнать больше</a>
+            {% else %}
+                <p class="lead">Вы вошли в систему. Перейдите в чат для работы с AI-репетитором.</p>
+                <a href="{% url 'main:chat' %}" class="btn btn-success btn-lg">Перейти в чат</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon">
+                <i class="fas fa-brain fa-3x mb-3"></i>
+            </div>
+            <h4>Адаптивное обучение</h4>
+            <p>Система подстраивается под ваш текущий уровень и темп обучения, предлагая оптимальную сложность материала.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon">
+                <i class="fas fa-comments fa-3x mb-3"></i>
+            </div>
+            <h4>Интерактивный диалог</h4>
+            <p>Задавайте вопросы и получайте подробные разъяснения от AI в режиме реального времени.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line fa-3x mb-3"></i>
+            </div>
+            <h4>Отслеживание прогресса</h4>
+            <p>Наблюдайте за своим прогрессом и улучшайте результаты с каждой решенной задачей.</p>
+        </div>
+    </div>
+
+    <div id="features" class="row mt-5 pt-5 border-top">
+        <div class="col-12 text-center mb-5">
+            <h2>Возможности нашего AI-репетитора</h2>
+            <p class="lead">Исследуйте все функции, которые помогут вам освоить математику</p>
+        </div>
+        
+        <div class="col-md-6 mb-5">
+            <h3><i class="fas fa-square-root-alt me-2"></i>Поддержка LaTeX</h3>
+            <p>Все математические формулы отображаются с использованием LaTeX, что обеспечивает их четкое и профессиональное представление:</p>
+            <div class="card p-3 bg-light">
+                <p>Пример запроса: "Объясни как найти производную функции $f(x) = x^2 \sin(x)$"</p>
+                <p>Ответ будет содержать формулы в формате LaTeX: $$f'(x) = 2x \sin(x) + x^2 \cos(x)$$</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-5">
+            <h3><i class="fas fa-chart-area me-2"></i>Интерактивные графики</h3>
+            <p>Визуализация функций и математических объектов с помощью интерактивных графиков:</p>
+            <div class="card p-3 bg-light">
+                <p>Пример запроса: "Построй график функции y = sin(x) и объясни её свойства"</p>
+                <p>AI создаст интерактивный график тригонометрической функции с подробным объяснением</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-5">
+            <h3><i class="fas fa-tasks me-2"></i>Пошаговое решение задач</h3>
+            <p>Получайте детальные пошаговые решения задач любой сложности:</p>
+            <div class="card p-3 bg-light">
+                <p>Пример запроса: "Реши уравнение $2x^2 - 5x + 3 = 0$ и объясни каждый шаг"</p>
+                <p>AI разберет решение по шагам, объясняя дискриминант, формулу корней и другие концепции</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-5">
+            <h3><i class="fas fa-chalkboard-teacher me-2"></i>Объяснение концепций</h3>
+            <p>Подробное объяснение сложных математических понятий с примерами:</p>
+            <div class="card p-3 bg-light">
+                <p>Пример запроса: "Что такое интеграл и как его применять?"</p>
+                <p>AI даст определение, геометрический смысл, основные свойства и примеры вычислений</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-12 text-center mb-5">
+            <h2>Примеры использования</h2>
+            <p class="lead">Вот несколько примеров того, как вы можете использовать нашего AI-репетитора</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Алгебра</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Решение уравнений и систем уравнений</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Упрощение выражений</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Разложение на множители</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Работа с матрицами и определителями</li>
+                    </ul>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('Реши уравнение 3x² - 4x - 7 = 0')">Скопировать пример</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Математический анализ</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Вычисление пределов</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Нахождение производных</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Интегрирование</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Исследование функций</li>
+                    </ul>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-success btn-sm" onclick="copyToClipboard('Найди производную функции f(x) = ln(x²+1)')">Скопировать пример</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Геометрия</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Вычисление площадей и объемов</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Построение и анализ графиков</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Нахождение уравнений кривых</li>
+                        <li class="mb-2"><i class="fas fa-angle-right me-2"></i>Решение задач на движение</li>
+                    </ul>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-info btn-sm" onclick="copyToClipboard('Как найти площадь треугольника, если известны все три стороны?')">Скопировать пример</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h2>Готовы начать учиться?</h2>
+            <p class="lead mb-4">
+                Зарегистрируйтесь сейчас и получите доступ ко всем возможностям нашего AI-репетитора по математике. 
+                Обучение никогда не было таким интересным и эффективным!
+            </p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'user:sign_up' %}" class="btn btn-primary btn-lg mb-5">Начать обучение</a>
+            {% else %}
+                <a href="{% url 'main:chat' %}" class="btn btn-success btn-lg mb-5">Перейти к обучению</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+    .container {
+        max-width: 1140px;
+    }
+    h1 {
+        font-weight: 600;
+        font-size: 2.5rem;
+    }
+    h2 {
+        font-weight: 500;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    h3 {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    .lead {
+        font-size: 1.1rem;
+        font-weight: 300;
+    }
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2e59d9;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    .btn-secondary:hover {
+        background-color: #545b62;
+        border-color: #545b62;
+    }
+    .border-top {
+        border-top-width: 1px !important;
+        border-top-color: #e3e6f0 !important;
+    }
+    .feature-icon {
+        color: #4e73df;
+        margin-bottom: 1rem;
+    }
+    .card {
+        border-radius: 0.35rem;
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        font-weight: 500;
+        border-radius: 0.35rem 0.35rem 0 0 !important;
+    }
+    .bg-primary {
+        background-color: #4e73df !important;
+    }
+    .bg-success {
+        background-color: #1cc88a !important;
+    }
+    .bg-info {
+        background-color: #36b9cc !important;
+    }
+    .fa-angle-right {
+        color: #4e73df;
+    }
+    /* Эффект для кнопок примеров */
+    .btn-outline-primary, .btn-outline-success, .btn-outline-info {
+        transition: all 0.3s;
+    }
+</style>
+
+<script>
+function copyToClipboard(text) {
+    // Создаем скрытый элемент для копирования текста
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    
+    // Показываем уведомление об успешном копировании
+    alert('Пример скопирован в буфер обмена. Вставьте его в чате с AI-репетитором!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,622 @@
+{% extends "wrapper.html" %}
+{% load static %}
+
+{% block title %}Чат с ИИ{% endblock %}
+
+{% block content %}
+<!-- Подключаем Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Подключаем Plotly.js для построения графиков -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+    #chat-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 70vh; /* Высота контейнера чата */
+        transition: all 0.3s ease;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    #chat-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 100vh;
+        margin: 0;
+        z-index: 1000;
+        border-radius: 0;
+        transition: all 0.3s ease;
+    }
+
+    #chat-messages {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        scroll-behavior: smooth; /* Плавная прокрутка */
+    }
+
+    .message {
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 20px;
+        max-width: 80%;
+        line-height: 1.5;
+        white-space: pre-line; /* Сохраняем переносы строк */
+        transition: all 0.3s;
+        animation: messageFadeIn 0.3s forwards;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    .user-message {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+
+    .ai-message {
+        background-color: #e9ecef;
+        color: #333;
+        align-self: flex-start;
+        margin-right: auto;
+        font-size: 16px;
+    }
+
+    /* Стили для математических формул */
+    .ai-message .MathJax {
+        display: inline-block;
+        margin: 2px 0;
+        transition: all 0.2s;
+    }
+
+    .ai-message .MathJax:hover {
+        transform: scale(1.05);
+    }
+
+    /* Улучшаем отображение блочных формул */
+    .ai-message mjx-container[jax="SVG"][display="true"] {
+        margin: 15px auto;
+        text-align: center;
+        max-width: 100%;
+        overflow-x: auto;
+        padding: 5px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    /* Улучшаем отображение списков и шагов решения */
+    .ai-message ul, .ai-message ol {
+        padding-left: 20px;
+        margin: 8px 0;
+    }
+
+    .ai-message li {
+        margin-bottom: 5px;
+    }
+
+    #chat-input-container {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 15px;
+        border-top: 1px solid #ccc;
+        background-color: #fff;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .input-row {
+        display: flex;
+        width: 100%;
+        position: relative;
+    }
+
+    #chat-input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        margin-right: 10px;
+        font-size: 15px;
+        transition: all 0.2s;
+        outline: none;
+    }
+    
+    #chat-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    }
+
+    #send-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    #send-button:hover {
+        background-color: #0069d9;
+        transform: translateY(-1px);
+    }
+    
+    #send-button:active {
+        transform: translateY(1px);
+    }
+
+    /* Стили для индикатора загрузки */
+    @keyframes thinking {
+        0% { content: ""; }
+        25% { content: "."; }
+        50% { content: ".."; }
+        75% { content: "..."; }
+    }
+    
+    #loading-message::after {
+        content: "";
+        display: inline-block;
+        animation: thinking 1.5s infinite;
+    }
+
+    /* Дополнительные стили для плавного появления и исчезновения сообщений */
+    .message.fade-in {
+        opacity: 0;
+    }
+
+    #chat-controls {
+        max-width: 800px;
+        margin: 5px auto 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    #chat-controls.fullscreen {
+        max-width: 100%;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1001;
+        height: 60px; /* Фиксированная высота панели */
+    }
+    
+    #chat-title {
+        font-size: 20px;
+        color: #333;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .chat-button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .clear-button {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+
+    .clear-button:hover {
+        background-color: #e9ecef;
+        color: #dc3545;
+    }
+    
+    .clear-button i {
+        font-size: 14px;
+    }
+
+    #chat-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .fullscreen-button {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+    
+    .fullscreen-button:hover {
+        background-color: #e9ecef;
+        color: #007bff;
+    }
+
+    .smart-button {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+    
+    .smart-button:hover {
+        background-color: #e9ecef;
+        color: #28a745;
+    }
+    
+    .smart-button.active {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    /* При полноэкранном режиме меняем отступы сообщений */
+    #chat-container.fullscreen #chat-messages {
+        padding: 20px;
+        padding-top: 70px; /* Добавляем отступ сверху для компенсации фиксированной панели */
+    }
+    
+    #chat-container.fullscreen #chat-input-container {
+        padding: 15px 20px;
+    }
+    
+    /* Лоадер для полной загрузки страницы */
+    #page-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s, visibility 0.5s;
+    }
+    
+    #page-loader.hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Подсказка для новых пользователей */
+    .input-hint {
+        position: absolute;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0,0,0,0.7);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        text-align: center;
+        width: 80%;
+        max-width: 500px;
+    }
+    
+    .input-hint.visible {
+        opacity: 1;
+    }
+
+    /* Анимации */
+    @keyframes messageFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #scroll-top-btn {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(0, 123, 255, 0.7);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.2s;
+        transform: scale(0.9);
+        z-index: 5;
+    }
+
+    #scroll-top-btn:hover {
+        background-color: rgba(0, 123, 255, 0.9);
+        transform: scale(1);
+    }
+
+    #scroll-top-btn.visible {
+        opacity: 1;
+    }
+
+    /* Стили для контейнеров графиков */
+    .graph-container {
+        width: 100%;
+        height: 400px;
+        margin: 15px 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background-color: #fff;
+    }
+    
+    /* Стили для кнопок управления графиком */
+    .graph-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+        justify-content: flex-end;
+    }
+    
+    .graph-button {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        color: #555;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .graph-button:hover {
+        background-color: #e9ecef;
+        color: #007bff;
+    }
+
+    /* LaTeX панель инструментов */
+    .latex-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+        padding: 5px 0;
+        border-top: 1px solid #eee;
+        overflow-x: auto;
+        max-width: 100%;
+        max-height: 200px;
+        transition: all 0.3s ease;
+    }
+
+    .latex-toolbar.collapsed {
+        max-height: 0;
+        overflow: hidden;
+        padding: 0;
+        margin-top: 0;
+        border-top: none;
+    }
+
+    .latex-toolbar::-webkit-scrollbar {
+        height: 5px;
+    }
+
+    .latex-toolbar::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 5px;
+    }
+
+    .latex-button {
+        padding: 5px 8px;
+        background-color: #f8f9fa;
+        border: 1px solid #dde;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        min-width: 30px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .latex-button:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+    }
+
+    .latex-category {
+        display: flex;
+        gap: 5px;
+        margin-right: 15px;
+        position: relative;
+    }
+
+    .latex-category::after {
+        content: "";
+        position: absolute;
+        right: -8px;
+        top: 5px;
+        bottom: 5px;
+        width: 1px;
+        background-color: #ddd;
+    }
+
+    .latex-category:last-child::after {
+        display: none;
+    }
+
+    /* Предпросмотр формулы */
+    #formula-preview {
+        margin-top: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        min-height: 30px;
+        display: none;
+        transition: all 0.3s;
+        border: 1px solid #e0e0e0;
+    }
+
+    #formula-preview.active {
+        display: block;
+    }
+
+    /* Кнопка переключения панели LaTeX */
+    #toggle-latex {
+        position: relative;
+        background-color: #f8f9fa;
+        border: 1px solid #dde;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        color: #666;
+        transition: all 0.2s;
+        margin-right: 8px;
+        align-self: center; /* Центрирование по вертикали в flex-контейнере */
+    }
+
+    #toggle-latex:hover {
+        background-color: #e9ecef;
+        color: #007bff;
+    }
+</style>
+
+<!-- Лоадер для полной загрузки страницы -->
+<div id="page-loader">
+    <div class="spinner"></div>
+</div>
+
+<!-- Скрытое поле для ID чата -->
+<input type="hidden" id="chat-id" value="{{ chat_session.id }}">
+
+<div id="chat-controls">
+    <h2 id="chat-title">Математический помощник</h2>
+    <div id="chat-buttons">
+        <button id="smart-mode-toggle" class="chat-button smart-button">
+            <i class="fas fa-brain"></i> <span>Умный режим</span>
+        </button>
+        <button id="fullscreen-toggle" class="chat-button fullscreen-button">
+            <i class="fas fa-expand"></i> <span>На весь экран</span>
+        </button>
+        <button id="clear-history" class="chat-button clear-button">
+            <i class="fas fa-trash"></i> Очистить историю
+        </button>
+    </div>
+</div>
+<div id="chat-container">
+    <div id="chat-messages">
+        <!-- Сообщения будут добавляться сюда -->
+        <div class="message ai-message">Здравствуйте! Я ваш математический помощник. Могу объяснить математические концепции, помочь решить задачи и подготовиться к контрольным работам. Не стесняйтесь задавать вопросы о любой теме: алгебра, геометрия, математический анализ и др. Чем могу помочь сегодня?</div>
+        <!-- Кнопка для прокрутки к началу диалога -->
+        <button id="scroll-top-btn" title="К началу диалога">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+    <div class="input-hint">Напишите свой вопрос по математике и нажмите Enter или кнопку "Отправить"</div>
+    <div id="chat-input-container">
+        <div class="input-row">
+            <button id="toggle-latex" title="Панель формул"><i class="fas fa-superscript"></i></button>
+            <input type="text" id="chat-input" placeholder="Введите ваш вопрос по математике...">
+            <button id="send-button"><i class="fas fa-paper-plane"></i> Отправить</button>
+        </div>
+        
+        <!-- Предпросмотр формулы -->
+        <div id="formula-preview"></div>
+        
+        <!-- Панель инструментов LaTeX -->
+        <div class="latex-toolbar collapsed">
+            <div class="latex-category">
+                <button class="latex-button" data-latex="$$$$" data-move="-2">Блочная формула $$</button>
+                <button class="latex-button" data-latex="\frac{a}{b}" data-move="-4">Дробь \frac{}{}</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\sqrt{}" data-move="-1">Корень \sqrt{}</button>
+                <button class="latex-button" data-latex="\sqrt[n]{}" data-move="-1">Корень n-й \sqrt[n]{}</button>
+                <button class="latex-button" data-latex="^{}" data-move="-1">Степень x^{}</button>
+                <button class="latex-button" data-latex="_{}" data-move="-1">Индекс x_{}</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\sum_{i=1}^{n}" data-move="0">Сумма \sum</button>
+                <button class="latex-button" data-latex="\prod_{i=1}^{n}" data-move="0">Произведение \prod</button>
+                <button class="latex-button" data-latex="\int_{a}^{b}" data-move="0">Интеграл \int</button>
+                <button class="latex-button" data-latex="\lim_{x \to a}" data-move="0">Предел \lim</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\alpha">\alpha</button>
+                <button class="latex-button" data-latex="\beta">\beta</button>
+                <button class="latex-button" data-latex="\gamma">\gamma</button>
+                <button class="latex-button" data-latex="\delta">\delta</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\pi">\pi</button>
+                <button class="latex-button" data-latex="\theta">\theta</button>
+                <button class="latex-button" data-latex="\omega">\omega</button>
+                <button class="latex-button" data-latex="\infty">\infty</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\sin">\sin</button>
+                <button class="latex-button" data-latex="\cos">\cos</button>
+                <button class="latex-button" data-latex="\tan">\tan</button>
+                <button class="latex-button" data-latex="\ln">\ln</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\rightarrow">\rightarrow</button>
+                <button class="latex-button" data-latex="\approx">\approx</button>
+                <button class="latex-button" data-latex="\neq">\neq</button>
+                <button class="latex-button" data-latex="\equiv">\equiv</button>
+            </div>
+            <div class="latex-category">
+                <button class="latex-button" data-latex="\begin{matrix} a & b \\ c & d \end{matrix}" data-move="0">матрица</button>
+                <button class="latex-button" data-latex="\begin{pmatrix} a & b \\ c & d \end{pmatrix}" data-move="0">(матрица)</button>
+                <button class="latex-button" data-latex="\begin{bmatrix} a & b \\ c & d \end{bmatrix}" data-move="0">[матрица]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %} 

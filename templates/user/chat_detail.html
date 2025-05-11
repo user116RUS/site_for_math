@@ -1,0 +1,76 @@
+{% extends 'wrapper.html' %}
+
+{% block title %}Чат: {{ chat_session.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ chat_session.title }}</h3>
+                        {% if chat_session.topic %}
+                            <span class="badge bg-primary">{{ chat_session.topic.name }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'user:chat_history' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад к истории
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="chat-container">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="chat-message mb-4 {% if message.role == 'user' %}user-message{% else %}assistant-message{% endif %}">
+                                    <div class="message-header d-flex justify-content-between mb-1">
+                                        <strong>{% if message.role == 'user' %}Вы{% else %}Ассистент{% endif %}</strong>
+                                        <small class="text-muted">{{ message.timestamp|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    <div class="message-content p-3 rounded {% if message.role == 'user' %}bg-light{% else %}bg-primary text-white{% endif %}">
+                                        {{ message.content|linebreaks }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info">
+                                <p>В этом чате нет сообщений.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'main:chat' %}" class="btn btn-primary">
+                            <i class="fas fa-comment"></i> Продолжить чат
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Чат создан: {{ chat_session.created_at|date:"d.m.Y H:i" }}</small><br>
+                    <small>Последнее обновление: {{ chat_session.updated_at|date:"d.m.Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-container {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.user-message .message-content {
+    border-radius: 15px 15px 0 15px !important;
+}
+
+.assistant-message .message-content {
+    border-radius: 15px 15px 15px 0 !important;
+}
+
+.message-content {
+    white-space: pre-wrap;
+}
+</style>
+{% endblock %} 

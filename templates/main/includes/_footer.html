@@ -1,0 +1,38 @@
+<div class="container mt-5 pt-4 border-top">
+    <div class="row">
+        <div class="col-md-6">
+            <h5>AI Репетитор по математике</h5>
+            <p>Современный подход к изучению математики с использованием искусственного интеллекта.</p>
+        </div>
+        <div class="col-md-3">
+            <h5>Полезные ссылки</h5>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'main:index' %}" class="text-decoration-none">Главная</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'main:chat' %}" class="text-decoration-none">Чат с AI</a></li>
+                <li><a href="{% url 'user:profile' %}" class="text-decoration-none">Мой профиль</a></li>
+                {% else %}
+                <li><a href="{% url 'user:sign_up' %}" class="text-decoration-none">Регистрация</a></li>
+                <li><a href="{% url 'user:login' %}" class="text-decoration-none">Вход</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="col-md-3">
+            <h5>Связаться с нами</h5>
+            <ul class="list-unstyled">
+                <li><i class="fas fa-envelope me-2"></i>nurgaleev.dev.tat@gmail.com</li>
+                <li><i class="fas fa-phone me-2"></i>+7 908-337-5199</li>
+                <li class="mt-3">
+                    <a href="#" class="text-decoration-none me-2"><i class="fab fa-telegram fa-lg"></i></a>
+                    <a href="#" class="text-decoration-none me-2"><i class="fab fa-vk fa-lg"></i></a>
+                    <a href="#" class="text-decoration-none"><i class="fab fa-youtube fa-lg"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <p class="small text-muted">&copy; {% now 'Y' %} ООО "Алга АйТи". Все права защищены.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,75 @@
+{% extends 'wrapper.html' %}
+
+{% block title %}История чатов{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">История чатов</h3>
+                    <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад к профилю
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <!-- Поиск и фильтры -->
+                        <div class="col-md-8">
+                            <form action="{% url 'user:chat_history' %}" method="get" class="d-flex">
+                                <input type="text" name="q" class="form-control me-2" placeholder="Поиск по названию чата..." value="{{ search_query }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <form action="{% url 'user:chat_history' %}" method="get" id="topicForm">
+                                <select name="topic" class="form-select" id="topicSelect" onchange="document.getElementById('topicForm').submit();">
+                                    <option value="">Все темы</option>
+                                    {% for topic in topics %}
+                                        <option value="{{ topic.id }}" {% if current_topic == topic.id %}selected{% endif %}>
+                                            {{ topic.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if chat_sessions %}
+                        <div class="list-group">
+                            {% for session in chat_sessions %}
+                                <a href="{% url 'user:chat_detail' session.id %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ session.title }}</h5>
+                                        <small>Обновлено: {{ session.updated_at|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    {% if session.topic %}
+                                        <p class="mb-1"><span class="badge bg-primary">{{ session.topic.name }}</span></p>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between">
+                                        <small>Создано: {{ session.created_at|date:"d.m.Y" }}</small>
+                                        <small>{{ session.messages.count }} сообщений</small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {% if search_query or current_topic %}
+                                <p>Нет чатов, соответствующих вашему запросу.</p>
+                                <a href="{% url 'user:chat_history' %}" class="btn btn-sm btn-outline-primary mt-2">Сбросить фильтры</a>
+                            {% else %}
+                                <p>У вас пока нет истории чатов.</p>
+                                <a href="{% url 'main:chat' %}" class="btn btn-sm btn-primary mt-2">Начать новый чат</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
