@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!window.Plotly) {
             console.error('Библиотека Plotly не загружена. Загружаем...');
             const script = document.createElement('script');
-            script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
+            script.src = 'https://cdn.plot.ly/plotly-2.29.1.min.js';
             script.onload = function() {
                 console.log('Plotly загружен, рендерим график');
                 renderPlotlyGraph(graphId, graphConfig);
